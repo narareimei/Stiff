@@ -99,6 +99,68 @@ namespace Stiff
             st.Dispose();
         }
 
+        [Test]
+        public void プロパティ_なし()
+        {
+            var st = Stiffer.GetInstance();
+            st.CreateApplication();
+            {
+                var cd = System.IO.Directory.GetCurrentDirectory();
+                Excel.Workbook oBook = null;
 
+                try
+                {
+                    oBook = st.OpenBook(cd + @"\TestBook.xlsx");
+                    string value = st.GetBuiltinProperty(oBook, "hoge");
+                    Assert.True( value == "");
+                }
+                finally
+                {
+                    if (oBook != null)
+                        Marshal.ReleaseComObject(oBook);
+                    oBook = null;
+                }
+            }
+            st.Dispose();
+        }
+
+        [Test]
+        public void プロパティ_有り()
+        {
+            var st = Stiffer.GetInstance();
+            st.CreateApplication();
+            try
+            {
+                var cd = System.IO.Directory.GetCurrentDirectory();
+                Excel.Workbook oBook = null;
+
+                try
+                {
+                    oBook = st.OpenBook(cd + @"\TestBook.xlsx");
+                    string value = st.GetBuiltinProperty(oBook, "Author");
+                    Assert.True(value == "小林礼明", "Author");
+                    Assert.True(st.GetBuiltinProperty(oBook, "Company") == "個人", "会社");
+
+                    Assert.True(st.GetBuiltinProperty(oBook, "Title") == "テスト用ブック", "タイトル");
+
+                    Assert.True(st.GetBuiltinProperty(oBook, "Subject") == "Stiff", "サブタイトル");
+                    Assert.True(st.GetBuiltinProperty(oBook, "Last Save Time") == "2013/09/23 7:35:35", "前回保存日時");
+                    Assert.True(st.GetBuiltinProperty(oBook, "Manager") == "わし", "管理者" + st.GetBuiltinProperty(oBook, "Manager"));
+                }
+                finally
+                {
+                    if (oBook != null)
+                        Marshal.ReleaseComObject(oBook);
+                    oBook = null;
+                }
+            }
+            finally
+            {
+                st.Dispose();
+            }
+        }
+
+    
+    
     }
 }

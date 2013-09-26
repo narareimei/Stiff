@@ -6,6 +6,7 @@ using Excel = Microsoft.Office.Interop.Excel;
 using System.Runtime.InteropServices;
 using Microsoft.Office.Core;
 using System.Reflection;
+using System.Diagnostics;
 
 namespace Stiff
 {
@@ -224,10 +225,36 @@ namespace Stiff
         /// <param name="oBook"></param>
         /// <param name="name"></param>
         /// <returns></returns>
-        public string GetBuiltinProperty(Excel.Workbook oBook, string name)
+        public string GetBuiltinProperty(Excel.Workbook oBook, string propertyName)
         {
+            string strValue = "";
 
-            return "";
+            try
+            {
+                object ps = oBook.BuiltinDocumentProperties;
+                Type typeDocBuiltInProps = ps.GetType();
+
+                //Get the Author property and display it.
+                object oDocAuthorProp = typeDocBuiltInProps.InvokeMember("Item",
+                                           BindingFlags.Default | BindingFlags.GetProperty,
+                                           null, ps, new object[] { propertyName });
+
+                Debug.Assert(oDocAuthorProp != null);
+                Type typeDocAuthorProp = oDocAuthorProp.GetType();
+                strValue = typeDocAuthorProp.InvokeMember("Value",
+                                           BindingFlags.Default | BindingFlags.GetProperty,
+                                           null, oDocAuthorProp, new object[] { }).ToString();
+
+                Console.WriteLine(string.Format("The Excel file: '{0}' Last modified value = '{1}'", "", strValue));
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(string.Format("The application failed with the following exception: '{0}' Stacktrace:'{1}'", ex.Message, ex.StackTrace));
+            }
+            finally
+            {
+            }
+            return strValue;
         }
 
 
@@ -305,33 +332,34 @@ namespace Stiff
 
 
                     {
-                        try
-                        {
-                            Type typeDocBuiltInProps = ps.GetType();
-                            //Get the Author property and display it.
-                            string strIndex = "Last Save Time";
-                            string strValue;
-                            object oDocAuthorProp = typeDocBuiltInProps.InvokeMember("Item",
-                                                       BindingFlags.Default |
-                                                       BindingFlags.GetProperty,
-                                                       null, ps,
-                                                       new object[] { strIndex });
-                            Type typeDocAuthorProp = oDocAuthorProp.GetType();
-                            strValue = typeDocAuthorProp.InvokeMember("Value",
-                                                       BindingFlags.Default |
-                                                       BindingFlags.GetProperty,
-                                                       null, oDocAuthorProp,
-                                                       new object[] { }).ToString();
+                        var strvalue = this.GetBuiltinProperty(oBook, "Title");
+                        //try
+                        //{
+                        //    Type typeDocBuiltInProps = ps.GetType();
+                        //    //Get the Author property and display it.
+                        //    string strIndex = "Last Save Time";
+                        //    string strValue;
+                        //    object oDocAuthorProp = typeDocBuiltInProps.InvokeMember("Item",
+                        //                               BindingFlags.Default |
+                        //                               BindingFlags.GetProperty,
+                        //                               null, ps,
+                        //                               new object[] { strIndex });
+                        //    Type typeDocAuthorProp = oDocAuthorProp.GetType();
+                        //    strValue = typeDocAuthorProp.InvokeMember("Value",
+                        //                               BindingFlags.Default |
+                        //                               BindingFlags.GetProperty,
+                        //                               null, oDocAuthorProp,
+                        //                               new object[] { }).ToString();
 
-                            Console.WriteLine(string.Format("The Excel file: '{0}' Last modified value = '{1}'", "", strValue));
-                        }
-                        catch (Exception ex)
-                        {
-                            Console.WriteLine(string.Format("The application failed with the following exception: '{0}' Stacktrace:'{1}'", ex.Message, ex.StackTrace));
-                        }
-                        finally
-                        {
-                        }
+                        //    Console.WriteLine(string.Format("The Excel file: '{0}' Last modified value = '{1}'", "", strValue));
+                        //}
+                        //catch (Exception ex)
+                        //{
+                        //    Console.WriteLine(string.Format("The application failed with the following exception: '{0}' Stacktrace:'{1}'", ex.Message, ex.StackTrace));
+                        //}
+                        //finally
+                        //{
+                        //}
                     }
 
 

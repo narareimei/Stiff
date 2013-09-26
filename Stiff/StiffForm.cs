@@ -73,7 +73,9 @@ namespace Stiff
 
         private void button1_Click(object sender, EventArgs e)
         {
-            stiffer.GetInformations(@"C:\Users\Administrator\Dropbox\private\dotNet\Stiff\Stiff\TestBook.xlsx");
+            var cd = System.IO.Directory.GetCurrentDirectory();
+
+            stiffer.GetInformations(cd + @"\TestBook.xlsx");
         }
 
 
