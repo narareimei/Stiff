@@ -140,9 +140,7 @@ namespace Stiff
                     string value = st.GetBuiltinProperty(oBook, "Author");
                     Assert.True(value == "小林礼明", "Author");
                     Assert.True(st.GetBuiltinProperty(oBook, "Company") == "個人", "会社");
-
                     Assert.True(st.GetBuiltinProperty(oBook, "Title") == "テスト用ブック", "タイトル");
-
                     Assert.True(st.GetBuiltinProperty(oBook, "Subject") == "Stiff", "サブタイトル");
                     Assert.True(st.GetBuiltinProperty(oBook, "Last Save Time") == "2013/09/23 7:35:35", "前回保存日時");
                     Assert.True(st.GetBuiltinProperty(oBook, "Manager") == "わし", "管理者" + st.GetBuiltinProperty(oBook, "Manager"));
@@ -160,7 +158,47 @@ namespace Stiff
             }
         }
 
-    
+
+        [Test]
+        [ExpectedException(typeof(System.Runtime.InteropServices.COMException))]
+        public void ブック情報取得_該当なし()
+        {
+            var st = Stiffer.GetInstance();
+            try
+            {
+                var cd = System.IO.Directory.GetCurrentDirectory();
+
+                var info = st.GetInformations(cd + @"\Hoge.xlsx");
+            }
+            finally
+            {
+                st.Dispose();
+            }
+        }
+
+        [Test]
+        public void ブック情報取得_該当あり()
+        {
+            var st = Stiffer.GetInstance();
+            try
+            {
+                var cd = System.IO.Directory.GetCurrentDirectory();
+
+                var info = st.GetInformations(cd + @"\TestBook.xlsx");
+
+                Assert.True(info != null, "ヌルチェック");
+                Assert.True(info.Author         == "小林礼明", "Author");
+                Assert.True(info.Title          == "テスト用ブック", "タイトル");
+                Assert.True(info.Subject        == "Stiff", "サブタイトル");
+                Assert.True(info.Company        == "個人", "会社");
+                Assert.True(info.Manager        == "わし", "管理者");
+                Assert.True(info.LastSaveTime   == "2013/09/23 7:35:35", "前回保存日時");
+            }
+            finally
+            {
+                st.Dispose();
+            }
+        }
     
     }
 }

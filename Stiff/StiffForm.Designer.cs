@@ -35,8 +35,8 @@
         private void InitializeComponent()
         {
             this.button1 = new System.Windows.Forms.Button();
-            this.dataGridView1 = new System.Windows.Forms.DataGridView();
-            ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
+            this.bookGrid = new System.Windows.Forms.DataGridView();
+            ((System.ComponentModel.ISupportInitialize)(this.bookGrid)).BeginInit();
             this.SuspendLayout();
             // 
             // button1
@@ -49,17 +49,20 @@
             this.button1.UseVisualStyleBackColor = true;
             this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
-            // dataGridView1
+            // bookGrid
             // 
-            this.dataGridView1.AllowUserToAddRows = false;
-            this.dataGridView1.AllowUserToDeleteRows = false;
-            this.dataGridView1.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dataGridView1.Location = new System.Drawing.Point(12, 56);
-            this.dataGridView1.Name = "dataGridView1";
-            this.dataGridView1.ReadOnly = true;
-            this.dataGridView1.RowTemplate.Height = 21;
-            this.dataGridView1.Size = new System.Drawing.Size(615, 150);
-            this.dataGridView1.TabIndex = 1;
+            this.bookGrid.AllowUserToAddRows = false;
+            this.bookGrid.AllowUserToDeleteRows = false;
+            this.bookGrid.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+                        | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.bookGrid.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.bookGrid.Location = new System.Drawing.Point(12, 56);
+            this.bookGrid.Name = "bookGrid";
+            this.bookGrid.ReadOnly = true;
+            this.bookGrid.RowTemplate.Height = 21;
+            this.bookGrid.Size = new System.Drawing.Size(615, 150);
+            this.bookGrid.TabIndex = 1;
             // 
             // StiffForm
             // 
@@ -67,14 +70,14 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(638, 220);
-            this.Controls.Add(this.dataGridView1);
+            this.Controls.Add(this.bookGrid);
             this.Controls.Add(this.button1);
             this.Name = "StiffForm";
             this.Text = "StiffForm";
             this.Load += new System.EventHandler(this.StiffForm_Load);
             this.DragDrop += new System.Windows.Forms.DragEventHandler(this.StiffForm_DragDrop);
             this.DragEnter += new System.Windows.Forms.DragEventHandler(this.StiffForm_DragEnter);
-            ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.bookGrid)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -82,6 +85,6 @@
         #endregion
 
         private System.Windows.Forms.Button button1;
-        private System.Windows.Forms.DataGridView dataGridView1;
+        private System.Windows.Forms.DataGridView bookGrid;
     }
 }

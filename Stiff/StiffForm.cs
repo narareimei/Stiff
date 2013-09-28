@@ -31,16 +31,18 @@ namespace Stiff
                 var dt = new DataTable();
 
                 // カラム定義
-                dt.Columns.Add(new DataColumn( "seq",       typeof(int)));
-                dt.Columns.Add(new DataColumn( "path",      typeof(string)));
-                dt.Columns.Add(new DataColumn( "file",      typeof(string)));
-                dt.Columns.Add(new DataColumn( "author",    typeof(string)));   // 作成者
-                dt.Columns.Add(new DataColumn( "title",     typeof(string)));   // タイトル
-                dt.Columns.Add(new DataColumn( "subtitle",  typeof(string)));   // サブタイトル
-                dt.Columns.Add(new DataColumn( "update",    typeof(DateTime))); // 更新日時
-                dt.Columns.Add(new DataColumn( "company",   typeof(string)));   // 会社
-                dt.Columns.Add(new DataColumn( "manager",   typeof(string)));   // 管理者
+                dt.Columns.Add(new DataColumn( "Seq",       typeof(int)));
+                dt.Columns.Add(new DataColumn( "Path",      typeof(string)));
+                dt.Columns.Add(new DataColumn( "File",      typeof(string)));
+                dt.Columns.Add(new DataColumn( "Author",    typeof(string)));   // 作成者
+                dt.Columns.Add(new DataColumn( "Title",     typeof(string)));   // タイトル
+                dt.Columns.Add(new DataColumn( "Subject",   typeof(string)));   // サブジェクト
+                dt.Columns.Add(new DataColumn( "Update",    typeof(DateTime))); // 更新日時
+                dt.Columns.Add(new DataColumn( "Company",   typeof(string)));   // 会社
+                dt.Columns.Add(new DataColumn( "Manager",   typeof(string)));   // 管理者
+                this.excelFiles = dt;
             }
+            bookGrid.DataSource = this.excelFiles;
         }
 
         private void StiffForm_DragEnter(object sender, DragEventArgs e)
@@ -75,7 +77,22 @@ namespace Stiff
         {
             var cd = System.IO.Directory.GetCurrentDirectory();
 
-            stiffer.GetInformations(cd + @"\TestBook.xlsx");
+            // ブック情報をデータテーブルへ格納してみる
+            var info = stiffer.GetInformations(cd + @"\TestBook.xlsx");
+            {
+                var row = this.excelFiles.NewRow();
+
+                row["Seq"       ] = 1;
+                row["Path"      ] = "";
+                row["File"      ] = info.FileName;
+                row["Author"    ] = info.Author;
+                row["Title"     ] = info.Title;
+                row["Subject"   ] = info.Subject;
+                row["Update"    ] = info.LastSaveTime;
+                row["Company"   ] = info.Company;
+                row["Manager"   ] = info.Manager;
+                excelFiles.Rows.Add(row);
+            }
         }
 
 
