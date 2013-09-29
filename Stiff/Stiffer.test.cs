@@ -199,6 +199,23 @@ namespace Stiff
                 st.Dispose();
             }
         }
-    
+
+        [Test]
+        //[ExpectedException(typeof(System.Runtime.InteropServices.COMException))]
+        public void ブック情報取得_Excel外ファイル()
+        {
+            var st = Stiffer.GetInstance();
+            try
+            {
+                var cd = System.IO.Directory.GetCurrentDirectory();
+
+                var info = st.GetInformations(cd + @"\Stiff.exe");
+                Assert.True( info.LastSaveTime == "" );
+            }
+            finally
+            {
+                st.Dispose();
+            }
+        }
     }
 }
