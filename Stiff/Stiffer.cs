@@ -20,6 +20,7 @@ namespace Stiff
 
         public String FileName { get; set; }
         public String LastSaveTime { get; set; }
+        public bool? Result { get; set; }
     }
 
     public partial class Stiffer : IDisposable
@@ -76,7 +77,6 @@ namespace Stiff
             return _instance;
         }
 
-
         /// <summary>
         /// Excelブックの各種情報取得
         /// </summary>
@@ -118,58 +118,107 @@ namespace Stiff
             return info;
         }
 
-        public void Unification()
+        /// <summary>
+        /// 新しい状態、プロパティで保存する
+        /// </summary>
+        public void Unification(BookInfo [] infomations)
         {
-            // 有効チェック
-            if (_disposed)
-                throw new ObjectDisposedException("Resource was disposed.");
+            // アプリケーション起動
+            this.CreateApplication();
 
-
-            // 一度お試しで
-            var filename = @"C:\Users\Administrator\Dropbox\private\dotNet\Stiff\Stiff\TestBook.xlsx";
-            if (_app == null)
+            foreach( var info in infomations)
             {
-                // Excelプロセスを毎回起動すると重いので一度だけにする
-                this._app = new Excel.Application();
-                this._app.DisplayAlerts = false;
-            }
-            {
-                var books = this._app.Workbooks;
-                var oBook = books.Open(
-                              filename,  // オープンするExcelファイル名
-                              Type.Missing, // （省略可能）UpdateLinks (0 / 1 / 2 / 3)
-                              Type.Missing, // （省略可能）ReadOnly (True / False )
-                              Type.Missing, // （省略可能）Format
-                                            // 1:タブ / 2:カンマ (,) / 3:スペース / 4:セミコロン (;)
-                                            // 5:なし / 6:引数 Delimiterで指定された文字
-                              Type.Missing, // （省略可能）Password
-                              Type.Missing, // （省略可能）WriteResPassword
-                              Type.Missing, // （省略可能）IgnoreReadOnlyRecommended
-                              Type.Missing, // （省略可能）Origin
-                              Type.Missing, // （省略可能）Delimiter
-                              Type.Missing, // （省略可能）Editable
-                              Type.Missing, // （省略可能）Notify
-                              Type.Missing, // （省略可能）Converter
-                              Type.Missing, // （省略可能）AddToMru
-                              Type.Missing, // （省略可能）Local
-                              Type.Missing  // （省略可能）CorruptLoad
-                          );
-                //// ワークシートを全て選択する
-                var sheets = oBook.Worksheets;
-                sheets.Select(Type.Missing);
-                var oSheet = (Excel.Worksheet)sheets[1];
-                //// A1セルを選択する
-                var cells = oSheet.Cells;
-                var range = ((Excel.Range)cells);
-                range.Select();
+                info.Result = false;
+                //
+                Excel.Workbook oBook = null;
+                Excel.Sheets oSheets = null;
+                Excel.Worksheet oSheet = null;
+                Excel.Range oCells = null;
+                Excel.Range oRange = null;
+                string filename = info.FileName;
+                try
+                {
+                    // ファイルオープン
+                    oBook = this.OpenBook(filename);
+                    if (oBook == null)
+                    {
+                        return;
+                    }
 
-                oSheet.SaveAs(filename, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing);
-                Marshal.ReleaseComObject(range);
-                Marshal.ReleaseComObject(cells);
-                Marshal.ReleaseComObject(oSheet);
-                Marshal.ReleaseComObject(sheets);
-                Marshal.ReleaseComObject(oBook);
-                Marshal.ReleaseComObject(books);
+                    // プロパティ設定
+                    {
+                        info.Title   = "";
+                        info.Subject = "";
+                        info.Company = "";
+                        info.Manager = "";
+                    }
+                    this.SetInformations(oBook, info);
+
+                    // 状態変更
+                    {
+                        // ワークシート全選択
+                        oSheets = oBook.Worksheets;
+                        oSheets.Select(Type.Missing);
+                        oSheet = (Excel.Worksheet)oSheets[1];
+
+                        // A1セル
+                        oCells = oSheet.Cells;
+                        oRange = ((Excel.Range)oCells[1, 1]);
+                        oRange.Select();
+
+                        // 表示倍率
+                        this._app.ActiveWindow.Zoom = 100;
+
+                        // 枠線
+                        this._app.ActiveWindow.DisplayGridlines = false;
+
+                        // 表示モード
+                        this._app.ActiveWindow.View = Microsoft.Office.Interop.Excel.XlWindowView.xlNormalView;
+
+                        // 先頭シートを選択する
+                        oSheet.Select(Type.Missing);
+                    }
+
+                    // 保存
+                    oBook.Close(true, filename, Type.Missing);
+                    Marshal.ReleaseComObject(oBook);
+                    oBook = null;
+                    info.Result = true;
+                }
+                finally
+                {
+                    if (oRange != null)
+                    {
+                        Marshal.ReleaseComObject(oRange);
+                    }
+                    oRange = null;
+
+                    if (oCells != null)
+                    {
+                        Marshal.ReleaseComObject(oCells);
+                    }
+                    oCells = null;
+
+                    if (oSheet != null)
+                    {
+                        Marshal.ReleaseComObject(oSheet);
+                    }
+                    oSheet = null;
+
+
+                    if (oSheets != null)
+                    {
+                        Marshal.ReleaseComObject(oSheets);
+                    }
+                    oSheets = null;
+
+                    if (oBook != null)
+                    {
+                        oBook.Close(false, filename, Type.Missing);
+                        Marshal.ReleaseComObject(oBook);
+                    }
+                    oBook = null;
+                }
             }
         }
 
@@ -210,8 +259,8 @@ namespace Stiff
                               Type.Missing, // （省略可能）UpdateLinks (0 / 1 / 2 / 3)
                               Type.Missing, // （省略可能）ReadOnly (True / False )
                               Type.Missing, // （省略可能）Format
-                    // 1:タブ / 2:カンマ (,) / 3:スペース / 4:セミコロン (;)
-                    // 5:なし / 6:引数 Delimiterで指定された文字
+                                            //      1:タブ / 2:カンマ (,) / 3:スペース / 4:セミコロン (;)
+                                            //      5:なし / 6:引数 Delimiterで指定された文字
                               Type.Missing, // （省略可能）Password
                               Type.Missing, // （省略可能）WriteResPassword
                               Type.Missing, // （省略可能）IgnoreReadOnlyRecommended
@@ -252,16 +301,16 @@ namespace Stiff
                 object ps = oBook.BuiltinDocumentProperties;
                 Type typeDocBuiltInProps = ps.GetType();
 
-                //Get the Author property and display it.
-                object oDocAuthorProp = typeDocBuiltInProps.InvokeMember("Item",
+                //Get the property and display it.
+                object oDocProp = typeDocBuiltInProps.InvokeMember("Item",
                                            BindingFlags.Default | BindingFlags.GetProperty,
                                            null, ps, new object[] { propertyName });
 
-                Debug.Assert(oDocAuthorProp != null);
-                Type typeDocAuthorProp = oDocAuthorProp.GetType();
+                Debug.Assert(oDocProp != null);
+                Type typeDocAuthorProp = oDocProp.GetType();
                 strValue = typeDocAuthorProp.InvokeMember("Value",
                                            BindingFlags.Default | BindingFlags.GetProperty,
-                                           null, oDocAuthorProp, new object[] { }).ToString();
+                                           null, oDocProp, new object[] { }).ToString();
 
                 Console.WriteLine(string.Format("The Excel file: '{0}' Last modified value = '{1}'", "", strValue));
             }
@@ -273,6 +322,55 @@ namespace Stiff
             {
             }
             return strValue;
+        }
+
+        /// <summary>
+        /// Excelファイルのプロパティを設定する
+        /// </summary>
+        /// <param name="oBook"></param>
+        /// <param name="name"></param>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        private void SetBuiltinProperty(Excel.Workbook oBook, string propertyName, string value)
+        {
+            try
+            {
+                object ps = oBook.BuiltinDocumentProperties;
+                Type typeDocBuiltInProps = ps.GetType();
+
+                //Get the property and display it.
+                object oDocProp = typeDocBuiltInProps.InvokeMember("Item",
+                                           BindingFlags.Default | BindingFlags.GetProperty,
+                                           null, ps, new object[] { propertyName });
+
+                Debug.Assert(oDocProp != null);
+                Type typeDocAuthorProp = oDocProp.GetType();
+                typeDocAuthorProp.InvokeMember("Value",
+                                           BindingFlags.Default | BindingFlags.SetProperty,
+                                           null, oDocProp, new object[] { value });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(string.Format("The application failed with the following exception: '{0}' Stacktrace:'{1}'", ex.Message, ex.StackTrace));
+            }
+            finally
+            {
+            }
+            return;
+        }
+
+        /// <summary>
+        /// ブックに新しいプロパティを設定する
+        /// </summary>
+        /// <param name="oBook"></param>
+        /// <param name="info"></param>
+        private void SetInformations(Excel.Workbook oBook, BookInfo info)
+        {
+            this.SetBuiltinProperty(oBook, "Author" , info.Author);
+            this.SetBuiltinProperty(oBook, "Title"  , info.Title);
+            this.SetBuiltinProperty(oBook, "Subject", info.Subject);
+            this.SetBuiltinProperty(oBook, "Manager", info.Manager);
+            this.SetBuiltinProperty(oBook, "Company", info.Company);
         }
 
         #endregion

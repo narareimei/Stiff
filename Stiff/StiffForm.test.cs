@@ -33,7 +33,6 @@ namespace Stiff
 
             var row = this.excelFiles.Rows[reccnt];
             Assert.True( (int)   row["Seq"       ] == 1                 , "Seq"        );
-            Assert.True( (string)row["Path"      ] == ""                , "Path"       );
             Assert.True( (string)row["File"      ] == info.FileName     , "File"       );
             Assert.True( (string)row["Author"    ] == info.Author       , "Author"     );
             Assert.True( (string)row["Title"     ] == info.Title        , "Title"      );
@@ -42,7 +41,6 @@ namespace Stiff
             Assert.True( (string)row["Company"   ] == info.Company      , "Company"    );
             Assert.True( (string)row["Manager"   ] == info.Manager      , "Manager"    );
         }
-
 
         [Test]
         [ExpectedException(typeof(System.Data.ConstraintException))]

@@ -34,20 +34,20 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.button1 = new System.Windows.Forms.Button();
+            this.btUnification = new System.Windows.Forms.Button();
             this.bookGrid = new System.Windows.Forms.DataGridView();
             ((System.ComponentModel.ISupportInitialize)(this.bookGrid)).BeginInit();
             this.SuspendLayout();
             // 
-            // button1
+            // btUnification
             // 
-            this.button1.Location = new System.Drawing.Point(12, 12);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(75, 23);
-            this.button1.TabIndex = 0;
-            this.button1.Text = "button1";
-            this.button1.UseVisualStyleBackColor = true;
-            this.button1.Click += new System.EventHandler(this.button1_Click);
+            this.btUnification.Location = new System.Drawing.Point(12, 12);
+            this.btUnification.Name = "btUnification";
+            this.btUnification.Size = new System.Drawing.Size(75, 23);
+            this.btUnification.TabIndex = 0;
+            this.btUnification.Text = "設定更新";
+            this.btUnification.UseVisualStyleBackColor = true;
+            this.btUnification.Click += new System.EventHandler(this.btUnification_Click);
             // 
             // bookGrid
             // 
@@ -61,7 +61,7 @@
             this.bookGrid.Name = "bookGrid";
             this.bookGrid.ReadOnly = true;
             this.bookGrid.RowTemplate.Height = 21;
-            this.bookGrid.Size = new System.Drawing.Size(839, 308);
+            this.bookGrid.Size = new System.Drawing.Size(1041, 308);
             this.bookGrid.TabIndex = 1;
             // 
             // StiffForm
@@ -69,9 +69,9 @@
             this.AllowDrop = true;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(862, 378);
+            this.ClientSize = new System.Drawing.Size(1064, 378);
             this.Controls.Add(this.bookGrid);
-            this.Controls.Add(this.button1);
+            this.Controls.Add(this.btUnification);
             this.Name = "StiffForm";
             this.Text = "StiffForm";
             this.Load += new System.EventHandler(this.StiffForm_Load);
@@ -84,7 +84,7 @@
 
         #endregion
 
-        private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.Button btUnification;
         private System.Windows.Forms.DataGridView bookGrid;
     }
 }

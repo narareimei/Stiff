@@ -139,11 +139,11 @@ namespace Stiff
                     oBook = st.OpenBook(cd + @"\TestBook.xlsx");
                     string value = st.GetBuiltinProperty(oBook, "Author");
                     Assert.True(value == "小林礼明", "Author");
-                    Assert.True(st.GetBuiltinProperty(oBook, "Company") == "個人", "会社");
                     Assert.True(st.GetBuiltinProperty(oBook, "Title") == "テスト用ブック", "タイトル");
                     Assert.True(st.GetBuiltinProperty(oBook, "Subject") == "Stiff", "サブタイトル");
-                    Assert.True(st.GetBuiltinProperty(oBook, "Last Save Time") == "2013/09/23 7:35:35", "前回保存日時");
+                    Assert.True(st.GetBuiltinProperty(oBook, "Company") == "個人", "会社");
                     Assert.True(st.GetBuiltinProperty(oBook, "Manager") == "わし", "管理者" + st.GetBuiltinProperty(oBook, "Manager"));
+                    Assert.True(st.GetBuiltinProperty(oBook, "Last Save Time") == "2013/10/01 23:03:27", "前回保存日時");
                 }
                 finally
                 {
@@ -192,7 +192,7 @@ namespace Stiff
                 Assert.True(info.Subject        == "Stiff", "サブタイトル");
                 Assert.True(info.Company        == "個人", "会社");
                 Assert.True(info.Manager        == "わし", "管理者");
-                Assert.True(info.LastSaveTime   == "2013/09/23 7:35:35", "前回保存日時");
+                Assert.True(info.LastSaveTime   == "2013/10/01 23:03:27", "前回保存日時");
             }
             finally
             {
@@ -211,6 +211,51 @@ namespace Stiff
 
                 var info = st.GetInformations(cd + @"\Stiff.exe");
                 Assert.True( info.LastSaveTime == "" );
+            }
+            finally
+            {
+                st.Dispose();
+            }
+        }
+
+        [Test]
+        public void プロパティ_変更()
+        {
+            var st = Stiffer.GetInstance();
+            st.CreateApplication();
+            try
+            {
+                var cd = System.IO.Directory.GetCurrentDirectory();
+                Excel.Workbook oBook = null;
+
+                try
+                {
+                    BookInfo info = this.GetInformations(cd + @"\TestBook.xlsx");
+
+                    info.Author  = "kobayashi";
+                    info.Title   = "Modified";
+                    info.Subject = "Tool";
+                    info.Company = "The Man";
+                    info.Manager = "Myself";
+
+                    // 書き換え
+                    oBook = st.OpenBook(cd + @"\TestBook.xlsx");
+                    this.SetInformations(oBook, info);
+
+                    // 確認
+                    Assert.True(st.GetBuiltinProperty(oBook, "Author"        ) == "kobayashi", "Author");
+                    Assert.True(st.GetBuiltinProperty(oBook, "Title"         ) == "Modified", "タイトル");
+                    Assert.True(st.GetBuiltinProperty(oBook, "Subject"       ) == "Tool", "サブタイトル");
+                    Assert.True(st.GetBuiltinProperty(oBook, "Company"       ) == "The Man", "会社");
+                    Assert.True(st.GetBuiltinProperty(oBook, "Manager"       ) == "Myself", "管理者" + st.GetBuiltinProperty(oBook, "Manager"));
+                    Assert.True(st.GetBuiltinProperty(oBook, "Last Save Time") == "2013/10/01 23:03:27", "前回保存日時");
+                }
+                finally
+                {
+                    if (oBook != null)
+                        Marshal.ReleaseComObject(oBook);
+                    oBook = null;
+                }
             }
             finally
             {

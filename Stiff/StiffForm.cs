@@ -14,6 +14,7 @@ namespace Stiff
         private Stiffer         stiffer;
 
         private DataTable       excelFiles;
+        private List<BookInfo>  bookInfoList ;
 
         /// <summary>
         /// コンストラクタ
@@ -21,6 +22,8 @@ namespace Stiff
         public StiffForm()
         {
             InitializeComponent();
+
+            bookInfoList = new List<BookInfo>();
         }
 
         #region イベントハンドラ
@@ -45,7 +48,6 @@ namespace Stiff
 
                 // カラム定義
                 dt.Columns.Add(new DataColumn("Seq",        typeof(int)));
-                dt.Columns.Add(new DataColumn("Path",       typeof(string)));
                 dt.Columns.Add(new DataColumn("File",       typeof(string)));
                 dt.Columns.Add(new DataColumn("Author",     typeof(string)));   // 作成者
                 dt.Columns.Add(new DataColumn("Title",      typeof(string)));   // タイトル
@@ -53,6 +55,7 @@ namespace Stiff
                 dt.Columns.Add(new DataColumn("Update",     typeof(string)));   // 更新日時
                 dt.Columns.Add(new DataColumn("Company",    typeof(string)));   // 会社
                 dt.Columns.Add(new DataColumn("Manager",    typeof(string)));   // 管理者
+                dt.Columns.Add(new DataColumn("結果",       typeof(string)));   // 結果
                 // プライマリキー設定
                 var pk = new DataColumn[1];
                 pk[0] = dt.Columns["File"];
@@ -98,11 +101,20 @@ namespace Stiff
         {
             // ドラッグ＆ドロップされたファイル
             string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
+            Cursor.Current = Cursors.WaitCursor;
 
-            var list = getBookInformations(files);
-            foreach (var info in list)
+            try
             {
-                addBookInfo(info);
+                var list = getBookInformations(files);
+                foreach (var info in list)
+                {
+                    addBookInfo(info);
+                    this.bookInfoList.Add(info);
+                }
+            }
+            finally
+            {
+                Cursor.Current = Cursors.Default;
             }
             return;
         }
@@ -114,25 +126,27 @@ namespace Stiff
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void button1_Click(object sender, EventArgs e)
+        private void btUnification_Click(object sender, EventArgs e)
         {
             var cd = System.IO.Directory.GetCurrentDirectory();
+            Cursor.Current = Cursors.WaitCursor;
 
-            // ブック情報をデータテーブルへ格納してみる
-            var info = stiffer.GetInformations(cd + @"\TestBook.xlsx");
+            try
             {
-                var row = this.excelFiles.NewRow();
+                // 設定
+                this.stiffer.Unification(this.bookInfoList.ToArray());
 
-                row["Seq"       ] = excelFiles.Rows.Count + 1;
-                row["Path"      ] = "";
-                row["File"      ] = info.FileName;
-                row["Author"    ] = info.Author;
-                row["Title"     ] = info.Title;
-                row["Subject"   ] = info.Subject;
-                row["Update"    ] = info.LastSaveTime;
-                row["Company"   ] = info.Company;
-                row["Manager"   ] = info.Manager;
-                excelFiles.Rows.Add(row);
+                // グリッドへ反映する
+                this.excelFiles.Rows.Clear();
+                foreach (var info in bookInfoList)
+                {
+                    addBookInfo(info);
+                }
+                this.GridRefresh();
+            }
+            finally
+            {
+                Cursor.Current = Cursors.Default;
             }
         }
 
@@ -149,7 +163,6 @@ namespace Stiff
             var row = this.excelFiles.NewRow();
 
             row["Seq"       ] = excelFiles.Rows.Count + 1;
-            row["Path"      ] = "";
             row["File"      ] = info.FileName;
             row["Author"    ] = info.Author;
             row["Title"     ] = info.Title;
@@ -157,6 +170,7 @@ namespace Stiff
             row["Update"    ] = info.LastSaveTime;
             row["Company"   ] = info.Company;
             row["Manager"   ] = info.Manager;
+            row["結果"] = (info.Result == null) ? "" : (info.Result == true ? "OK" : "NG"); ;
             excelFiles.Rows.Add(row);
             return;
         }
@@ -175,6 +189,29 @@ namespace Stiff
                 list.Add(info);
             }
             return list.ToArray();
+        }
+
+        /// <summary>
+        /// 行ごとの色付け
+        /// </summary>
+        private void GridRefresh()
+        {
+            foreach (DataGridViewRow row in bookGrid.Rows)
+            {
+                switch (row.Cells["結果"].Value.ToString())
+                {
+                    case "OK" :
+                        row.DefaultCellStyle.BackColor = Color.LightGreen;
+                        break;
+                    case "NG":
+                        row.DefaultCellStyle.BackColor = Color.Yellow;
+                        break;
+                    default:
+                        row.DefaultCellStyle.BackColor = Color.Gray;
+                        break;
+                }
+            }
+            return;
         }
 
         #endregion //ロジック
