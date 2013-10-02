@@ -132,9 +132,9 @@ namespace Stiff
                 //
                 Excel.Workbook oBook = null;
                 Excel.Sheets oSheets = null;
-                Excel.Worksheet oSheet = null;
-                Excel.Range oCells = null;
-                Excel.Range oRange = null;
+                Excel.Worksheet oTopSheet = null;
+                int topIdx = 0;
+
                 string filename = info.FileName;
                 try
                 {
@@ -155,28 +155,68 @@ namespace Stiff
                     this.SetInformations(oBook, info);
 
                     // 状態変更
+                    oSheets = oBook.Worksheets;
+                    for (int i = 1; i <= oSheets.Count; ++i)
                     {
-                        // ワークシート全選択
-                        oSheets = oBook.Worksheets;
-                        oSheets.Select(Type.Missing);
-                        oSheet = (Excel.Worksheet)oSheets[1];
+                        Excel.Worksheet oSheet = null;
+                        Excel.Range oCells = null;
+                        Excel.Range oRange = null;
 
-                        // A1セル
-                        oCells = oSheet.Cells;
-                        oRange = ((Excel.Range)oCells[1, 1]);
-                        oRange.Select();
+                        try
+                        {
+                            oSheet = (Excel.Worksheet)oSheets[i];
+                            if (oSheet.Visible != Microsoft.Office.Interop.Excel.XlSheetVisibility.xlSheetVisible)
+                            {
+                                continue;
+                            }
+                            oSheet.Activate();
 
-                        // 表示倍率
-                        this._app.ActiveWindow.Zoom = 100;
+                            // 最初に表示シートを保持しておく
+                            if (topIdx == 0)
+                            {
+                                topIdx = i;
+                            }
 
-                        // 枠線
-                        this._app.ActiveWindow.DisplayGridlines = false;
+                            // A1セル
+                            oCells = oSheet.Cells;
+                            oRange = ((Excel.Range)oCells[1, 1]);
+                            oRange.Select();
 
-                        // 表示モード
-                        this._app.ActiveWindow.View = Microsoft.Office.Interop.Excel.XlWindowView.xlNormalView;
+                            // 表示倍率
+                            this._app.ActiveWindow.Zoom = 100;
 
-                        // 先頭シートを選択する
-                        oSheet.Select(Type.Missing);
+                            // 枠線
+                            this._app.ActiveWindow.DisplayGridlines = false;
+
+                            // 表示モード
+                            this._app.ActiveWindow.View = Microsoft.Office.Interop.Excel.XlWindowView.xlNormalView;
+
+                        }
+                        finally
+                        {
+                            if (oRange != null)
+                            {
+                                Marshal.ReleaseComObject(oRange);
+                            }
+                            oRange = null;
+
+                            if (oCells != null)
+                            {
+                                Marshal.ReleaseComObject(oCells);
+                            }
+                            oCells = null;
+
+                            if (oSheet != null)
+                            {
+                                Marshal.ReleaseComObject(oSheet);
+                            }
+                            oSheet = null;
+                        }
+                    }
+                    if (topIdx != 0)
+                    {
+                        oTopSheet = (Excel.Worksheet)oSheets[topIdx];
+                        oTopSheet.Activate();
                     }
 
                     // 保存
@@ -187,24 +227,11 @@ namespace Stiff
                 }
                 finally
                 {
-                    if (oRange != null)
+                   if (oTopSheet != null)
                     {
-                        Marshal.ReleaseComObject(oRange);
+                        Marshal.ReleaseComObject(oTopSheet);
                     }
-                    oRange = null;
-
-                    if (oCells != null)
-                    {
-                        Marshal.ReleaseComObject(oCells);
-                    }
-                    oCells = null;
-
-                    if (oSheet != null)
-                    {
-                        Marshal.ReleaseComObject(oSheet);
-                    }
-                    oSheet = null;
-
+                    oTopSheet = null;
 
                     if (oSheets != null)
                     {
